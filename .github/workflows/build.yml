@@ -1,0 +1,45 @@
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y inkscape x11-apps
+          python -m pip install --upgrade pip clickgen
+          pip install --force-reinstall --upgrade attrs
+        continue-on-error: false
+
+      - name: Build Breeze
+        run: |
+          ctgen build.toml -n 'Breeze' -d 'breeze/cursors/Breeze/build/x2/'
+          ctgen build.toml -n 'Breeze-Snow' -d 'breeze/cursors/Breeze_Snow/build/x2/'
+
+      - name: Package
+        run: |
+          zip -jr Breeze.zip themes/Breeze-Windows/
+          zip -jr Breeze-Snow.zip themes/Breeze-Snow-Windows/
+          sha512sum Breeze.zip Breeze-Snow.zip > sha512sum
+
+      - name: Publish
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "Breeze.zip,Breeze-Snow.zip,sha512sum"
+          token: ${{ secrets.GITHUB_TOKEN }}
