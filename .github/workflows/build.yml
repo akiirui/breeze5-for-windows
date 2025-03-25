@@ -1,5 +1,4 @@
 name: build
-
 on:
   workflow_dispatch:
   push:
@@ -42,4 +41,3 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: "Breeze.zip,Breeze-Snow.zip,sha512sum"
-          token: ${{ secrets.GITHUB_TOKEN }}
